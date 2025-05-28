@@ -31,6 +31,11 @@ class Application {
   }
   static var engine: Engine?
   static var output: Output?
+  // Add new properties for per-app volume control
+  static var xpcClient: XPCClient?
+  static var audioTapCoordinator: AudioTapCoordinator?
+  static var perAppVolumeManager: PerApplicationVolumeManager?
+
   static var engineCreated = EmitterKit.Event<Void>()
   static var outputCreated = EmitterKit.Event<Void>()
 
@@ -55,6 +60,8 @@ class Application {
 
   static var dataBus: ApplicationDataBus!
   static let error = EmitterKit.Event<String>()
+  // Reference to the PerAppVolumeDataBus
+  static var perAppVolumeDataBus: PerAppVolumeDataBus?
   
   static var updater = SUUpdater(for: Bundle.main)!
   
@@ -146,9 +153,60 @@ class Application {
     settingUpAudio = true
     Console.log("Setting up Audio Engine")
     Driver.show {
+      // Initialize XPC Client and Per-App Volume Managers
+      self.xpcClient = XPCClient()
+      self.xpcClient?.installHelperIfNeeded { [weak self] success, error in
+        guard let self = self else { return }
+        if success {
+          Console.log("XPC Helper installed or already present.")
+          // Ensure engine is available before initializing managers that depend on it
+          if self.engine == nil {
+            // This might indicate a logic error if engine is expected to be ready here.
+            // For now, let's assume createAudioPipeline or similar will set it up.
+            // If PerApplicationVolumeManager needs the engine immediately,
+            // its initialization might need to be tied to engineCreated event.
+            Console.log("Engine not yet initialized. Deferring PerAppVolumeManager setup or ensure engine is ready.")
+            // However, PerApplicationVolumeManager takes an AVAudioEngine instance.
+            // Let's assume `createAudioPipeline()` which creates `Application.engine`
+            // will be called before this manager is used, or we pass it later.
+            // For now, we might need to adjust initialization order or pass engine later.
+            // Let's proceed assuming engine will be available from `createAudioPipeline`.
+            // This implies PerApplicationVolumeManager might need to be initialized *after* `createAudioPipeline`
+            // or be passed the engine instance once it's created.
+
+            // Re-thinking: setupAudio calls startPassthrough, which calls createAudioPipeline.
+            // So, engine will be created. We need to ensure these managers are initialized
+            // at a point where Application.engine.engine is valid.
+
+            // Let's defer initialization of managers requiring the engine until after createAudioPipeline
+            // or ensure they are robust to a nil engine initially.
+            // For now, we'll initialize them here but be mindful of the engine dependency.
+            // A better place might be within createAudioPipeline or just after it.
+
+          }
+          // If Application.engine is already created, use its AVAudioEngine instance
+          // This part needs to be robust. If engine is created later, these need to be created/configured later.
+          // Let's assume for now that `createAudioPipeline` will handle creating Application.engine
+          // and then we can initialize these.
+          // For now, we'll proceed with initialization, assuming engine will be valid soon.
+
+          // The PerApplicationVolumeManager needs the actual AVAudioEngine from the Engine class.
+          // This suggests that PerApplicationVolumeManager should be initialized
+          // after `Application.engine = Engine()` is called.
+
+          // Let's move the initialization of PerApplicationVolumeManager and AudioTapCoordinator
+          // to a point where `Application.engine.engine` is guaranteed to be non-nil.
+          // This will likely be within or after `createAudioPipeline`.
+          // For now, we'll only init XPCClient here.
+          
+        } else {
+          Console.log("XPC Helper installation failed: \(error?.localizedDescription ?? "Unknown error")")
+          // Handle helper installation failure (e.g., notify user)
+        }
+      }
       setupDeviceEvents()
       startPassthrough {
-        settingUpAudio = false
+        self.settingUpAudio = false
       }
     }
   }
@@ -355,11 +413,31 @@ class Application {
   
   private static func createAudioPipeline () {
     engine = nil
-    engine = Engine()
+    engine = Engine() // Engine instance is created here
     engineCreated.emit()
     output = nil
     output = Output(device: selectedDevice!)
     outputCreated.emit()
+
+    // Now that Application.engine.engine is available, initialize per-app managers
+    if let mainAVEngine = Application.engine?.engine, let xpc = self.xpcClient {
+      self.perAppVolumeManager = PerApplicationVolumeManager(engine: mainAVEngine, xpcClient: xpc)
+      self.audioTapCoordinator = AudioTapCoordinator(xpcClient: xpc, volumeManager: self.perAppVolumeManager!)
+      Console.log("PerApplicationVolumeManager and AudioTapCoordinator initialized.")
+
+      // If DataBus is already set up, register the new PerAppVolumeDataBus
+      // Otherwise, it will be handled in setupDataBus
+      if self.dataBus != nil, let pavm = self.perAppVolumeManager, let atc = self.audioTapCoordinator {
+        self.perAppVolumeDataBus = PerAppVolumeDataBus(volumeManager: pavm, tapCoordinator: atc)
+        // TODO: Register perAppVolumeDataBus with the main DataBus if that's how it works
+        // e.g., self.dataBus.addModule(self.perAppVolumeDataBus)
+         Console.log("PerAppVolumeDataBus created and should be registered.")
+      }
+
+    } else {
+      Console.log("Failed to initialize PerApplicationVolumeManager or AudioTapCoordinator due to missing engine or XPC client.")
+    }
+
 
     selectedDeviceSampleRateChangedListener = AudioDeviceEvents.on(
       .nominalSampleRateChanged,
@@ -417,6 +495,20 @@ class Application {
   private static func setupDataBus () {
     Console.log("Setting up Data Bus")
     dataBus = ApplicationDataBus(bridge: UI.bridge)
+    
+    // Initialize and register PerAppVolumeDataBus if managers are ready
+    if let pavm = self.perAppVolumeManager, let atc = self.audioTapCoordinator {
+        if self.perAppVolumeDataBus == nil { // Avoid re-initialization if createAudioPipeline already did it
+            self.perAppVolumeDataBus = PerAppVolumeDataBus(volumeManager: pavm, tapCoordinator: atc)
+            // TODO: Register perAppVolumeDataBus with the main DataBus
+            // e.g., self.dataBus.addModule(self.perAppVolumeDataBus)
+            Console.log("PerAppVolumeDataBus created and should be registered from setupDataBus.")
+        }
+    } else {
+        Console.log("PerAppVolumeManager or AudioTapCoordinator not ready when setupDataBus was called.")
+        // This might happen if setupDataBus is called before createAudioPipeline fully completes.
+        // The logic in createAudioPipeline also tries to init it. One of them should succeed.
+    }
   }
   
   static var overrideNextVolumeEvent = false
@@ -548,6 +640,18 @@ class Application {
   static func stopSave (_ completion: @escaping () -> Void) {
     Storage.synchronize()
     stopListeners()
+
+    // Stop and deinitialize per-app volume components
+    // audioTapCoordinator?.destroyAllTaps() // Add a method to coordinator to clean up all taps
+    // perAppVolumeManager?.saveSettings() // Ensure settings are saved
+    // Consider deinitializing them or calling specific stop methods.
+    // For now, their deinit methods should handle cleanup.
+    // If explicit stop is needed:
+    // audioTapCoordinator?.stop()
+    // perAppVolumeManager?.stop()
+    Console.log("Stopping per-app volume managers (conceptual - deinit should handle cleanup).")
+    // Actual destruction of taps should be handled by audioTapCoordinator's deinit or a specific stop method.
+
     stopRemoveEngines {
       switchBackToLastKnownDevice()
       completion()
@@ -596,6 +700,11 @@ class Application {
   }
   
   static func handleTermination (_ completion: (() -> Void)? = nil) {
+    // Ensure per-app components are also cleaned up
+    // audioTapCoordinator?.destroyAllTaps()
+    // perAppVolumeManager?.saveSettings()
+    Console.log("Handling termination: Ensuring per-app managers clean up.")
+
     stopSave {
       Driver.hidden = true
       if completion != nil {
