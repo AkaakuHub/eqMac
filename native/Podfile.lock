@@ -3,9 +3,9 @@ PODS:
   - EmitterKit (5.2.2)
   - KeychainSwift (13.0.0)
   - ReSwift (6.1.1)
-  - Sentry (7.1.4):
-    - Sentry/Core (= 7.1.4)
-  - Sentry/Core (7.1.4)
+  - Sentry (8.51.1):
+    - Sentry/Core (= 8.51.1)
+  - Sentry/Core (8.51.1)
   - Sparkle (1.27.3)
   - STPrivilegedTask (1.0.7)
   - SwiftHTTP (3.0.1)
@@ -20,7 +20,7 @@ DEPENDENCIES:
   - EmitterKit (~> 5.2.2)
   - KeychainSwift (~> 13.0)
   - ReSwift (~> 6.1)
-  - Sentry (~> 7.1.3)
+  - Sentry (~> 8.51.1)
   - Sparkle (~> 1.24)
   - STPrivilegedTask (from `https://github.com/sveinbjornt/STPrivilegedTask.git`, commit `fdca677c77adb166a2be4c5ea9c7580a738c49c9`)
   - SwiftHTTP (~> 3.0)
@@ -60,7 +60,7 @@ SPEC CHECKSUMS:
   EmitterKit: e7a27b37118823d8ad413b8396f75e40d59f8cba
   KeychainSwift: 23d6c16cbc33f20fafa30c3d783241b4b87d998c
   ReSwift: 929afd2c897f0d33c76c730710a31bb2d2a66713
-  Sentry: 1d3eb1a25f8c5333c88dd5603904a6d461cd9fcf
+  Sentry: d950c807ffb8e966ebf019b546505a144d35d439
   Sparkle: 9c92b492e4eedc1abe98ca77cb3ecc6f1223b01e
   STPrivilegedTask: 56c3397238a1ec07720fb877a044898373cd2c68
   SwiftHTTP: e94f1aa8cde58637dcc0100f6349de31a3337fde
@@ -70,6 +70,6 @@ SPEC CHECKSUMS:
   WebViewJavascriptBridge: 7f5bc4d3581e672e8f32bd0f812d54bc69bb8e29
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
-PODFILE CHECKSUM: 7fce915728fd4d7082c90f1cb5631149ec9c40d6
+PODFILE CHECKSUM: 019b3b188f710c297daeb549edbf717b90b26777
 
 COCOAPODS: 1.16.2

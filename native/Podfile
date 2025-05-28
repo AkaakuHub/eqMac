@@ -2,14 +2,14 @@
 source 'https://github.com/CocoaPods/Specs.git'
 
 # Uncomment the next line to define a global platform for your project
-platform :osx, '10.12'
+platform :osx, '15.0'
 workspace 'eqMac.xcworkspace'
 use_frameworks!
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.12'
+      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '15.0'
     end
   end
 end
@@ -33,7 +33,7 @@ target 'eqMac' do
   pod 'ReSwift', '~> 6.1'
   pod 'SwiftLint'
   pod 'Sparkle', '~> 1.24'
-  pod 'Sentry', '~> 7.1.3'
+  pod 'Sentry', '~> 8.51.1'
   pod 'EmitterKit', '~> 5.2.2'
   pod 'SwiftyJSON', '~> 4.2'
   pod 'SwiftyUserDefaults', '4.0'
