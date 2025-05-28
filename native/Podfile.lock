@@ -1,5 +1,5 @@
 PODS:
-  - AMCoreAudio (3.3.1)
+  - AMCoreAudio (3.4)
   - EmitterKit (5.2.2)
   - KeychainSwift (13.0.0)
   - ReSwift (6.1.1)
@@ -9,14 +9,14 @@ PODS:
   - Sparkle (1.27.3)
   - STPrivilegedTask (1.0.7)
   - SwiftHTTP (3.0.1)
-  - SwiftLint (0.51.0)
+  - SwiftLint (0.59.1)
   - SwiftyJSON (4.3.0)
   - SwiftyUserDefaults (4.0.0)
   - WebViewJavascriptBridge (6.0.3)
   - Zip (2.1.2)
 
 DEPENDENCIES:
-  - AMCoreAudio (~> 3.3.0)
+  - AMCoreAudio (~> 3.4.0)
   - EmitterKit (~> 5.2.2)
   - KeychainSwift (~> 13.0)
   - ReSwift (~> 6.1)
@@ -56,7 +56,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/sveinbjornt/STPrivilegedTask.git
 
 SPEC CHECKSUMS:
-  AMCoreAudio: 6bf97d548d02ebb75b56c1cbf6b1f87bcfdeb748
+  AMCoreAudio: dc23ebb735541a90fc8167435ad25bfa5bff8b89
   EmitterKit: e7a27b37118823d8ad413b8396f75e40d59f8cba
   KeychainSwift: 23d6c16cbc33f20fafa30c3d783241b4b87d998c
   ReSwift: 929afd2c897f0d33c76c730710a31bb2d2a66713
@@ -64,12 +64,12 @@ SPEC CHECKSUMS:
   Sparkle: 9c92b492e4eedc1abe98ca77cb3ecc6f1223b01e
   STPrivilegedTask: 56c3397238a1ec07720fb877a044898373cd2c68
   SwiftHTTP: e94f1aa8cde58637dcc0100f6349de31a3337fde
-  SwiftLint: 1b7561918a19e23bfed960e40759086e70f4dba5
+  SwiftLint: 3d48e2fb2a3468fdaccf049e5e755df22fb40c2c
   SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
   SwiftyUserDefaults: 6a1951df1daa19337862b677dd9a4b9bd4c288cd
   WebViewJavascriptBridge: 7f5bc4d3581e672e8f32bd0f812d54bc69bb8e29
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
-PODFILE CHECKSUM: 019b3b188f710c297daeb549edbf717b90b26777
+PODFILE CHECKSUM: 5aab4207b666445570ecaef8d0ef7ec13442bcea
 
 COCOAPODS: 1.16.2
